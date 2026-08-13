@@ -1,7 +1,8 @@
 {
   "functions": {
     "src/app/**/*.{jsx,tsx,js,ts}": {
-      "includeFiles": "native/**"
+      "includeFiles": "native/**",
+      "maxDuration": 60
     }
   }
 }

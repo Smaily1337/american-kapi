@@ -1,5 +1,5 @@
 import { CookieJar } from "tough-cookie";
-import { existsSync } from "node:fs";
+import { existsSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseCopartLookup } from "./lookup";
@@ -24,26 +24,52 @@ const PAGE_SIZE = 20;
 
 type RawLot = Record<string, unknown>;
 
+const LINUX_BINDING_URL =
+  "https://raw.githubusercontent.com/Smaily1337/american-kapi/main/native/impit-node.linux-x64-gnu.node";
+const LINUX_BINDING_MIN_BYTES = 1_000_000;
+
 let jar = new CookieJar();
 let client: Impit | null = null;
 let ImpitCtor: (typeof import("impit"))["Impit"] | null = null;
 let cookieTs = 0;
 let cookiePromise: Promise<void> | null = null;
+let linuxBindingReady: Promise<void> | null = null;
 
-function linuxBindingPath(): string {
-  const fromModule = fileURLToPath(
-    new URL("../../native/impit-node.linux-x64-gnu.node", import.meta.url),
+function localLinuxBinding(): string | null {
+  const candidates = [
+    fileURLToPath(
+      new URL("../../native/impit-node.linux-x64-gnu.node", import.meta.url),
+    ),
+    join(process.cwd(), "native/impit-node.linux-x64-gnu.node"),
+    join("/tmp", "impit-node.linux-x64-gnu.node"),
+  ];
+  return (
+    candidates.find(
+      (path) => existsSync(path) && statSync(path).size > LINUX_BINDING_MIN_BYTES,
+    ) ?? null
   );
-  const fromCwd = join(process.cwd(), "native/impit-node.linux-x64-gnu.node");
-  if (existsSync(fromModule)) return fromModule;
-  return fromCwd;
+}
+
+async function ensureLinuxBinding(): Promise<void> {
+  if (process.platform !== "linux") return;
+  const local = localLinuxBinding();
+  if (local) {
+    process.env.NAPI_RS_NATIVE_LIBRARY_PATH = local;
+    return;
+  }
+  const dest = join("/tmp", "impit-node.linux-x64-gnu.node");
+  const response = await fetch(LINUX_BINDING_URL);
+  if (!response.ok) {
+    throw new Error(`Nie pobrano binarki Impit (${response.status})`);
+  }
+  writeFileSync(dest, Buffer.from(await response.arrayBuffer()));
+  process.env.NAPI_RS_NATIVE_LIBRARY_PATH = dest;
 }
 
 async function getClient(): Promise<Impit> {
   if (!client) {
-    if (process.platform === "linux") {
-      process.env.NAPI_RS_NATIVE_LIBRARY_PATH = linuxBindingPath();
-    }
+    if (!linuxBindingReady) linuxBindingReady = ensureLinuxBinding();
+    await linuxBindingReady;
     if (!ImpitCtor) {
       const mod = await import("impit");
       ImpitCtor = mod.Impit;
