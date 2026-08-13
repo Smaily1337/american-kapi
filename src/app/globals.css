@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #112e51;
+  --navy-hover: #0c2340;
+  --orange: #c8102e;
+  --orange-hover: #a50d26;
+  --bg: #f5f7fa;
+  --text: #112e51;
+  --muted: #5c6b7a;
+  --border: #ccd1d9;
+  --green: #1a7f37;
+  --red: #c8102e;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-navy-hover: var(--navy-hover);
+  --color-orange: var(--orange);
+  --color-orange-hover: var(--orange-hover);
+  --color-page: var(--bg);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-deal: var(--green);
+  --font-sans: var(--font-inter);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+::selection {
+  background: #f4c5cc;
+  color: var(--navy);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
