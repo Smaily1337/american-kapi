@@ -1,5 +1,7 @@
 import { CookieJar } from "tough-cookie";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseCopartLookup } from "./lookup";
 import type { Impit } from "impit";
 import type {
@@ -28,13 +30,19 @@ let ImpitCtor: (typeof import("impit"))["Impit"] | null = null;
 let cookieTs = 0;
 let cookiePromise: Promise<void> | null = null;
 
+function linuxBindingPath(): string {
+  const fromModule = fileURLToPath(
+    new URL("../../native/impit-node.linux-x64-gnu.node", import.meta.url),
+  );
+  const fromCwd = join(process.cwd(), "native/impit-node.linux-x64-gnu.node");
+  if (existsSync(fromModule)) return fromModule;
+  return fromCwd;
+}
+
 async function getClient(): Promise<Impit> {
   if (!client) {
     if (process.platform === "linux") {
-      process.env.NAPI_RS_NATIVE_LIBRARY_PATH = join(
-        process.cwd(),
-        "native/impit-node.linux-x64-gnu.node",
-      );
+      process.env.NAPI_RS_NATIVE_LIBRARY_PATH = linuxBindingPath();
     }
     if (!ImpitCtor) {
       const mod = await import("impit");

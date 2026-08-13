@@ -3,11 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["impit", "impit-linux-x64-gnu", "tough-cookie"],
   outputFileTracingIncludes: {
-    "/*": [
-      "./native/**",
-      "./node_modules/impit-linux-x64-gnu/**",
-      "./node_modules/impit/**",
-    ],
+    "*": ["./native/**"],
+    "/": ["./native/**"],
+    "/ogloszenia": ["./native/**"],
+    "/ogloszenia/[id]": ["./native/**"],
+    "/api/copart/search": ["./native/**"],
+    "/api/copart/lot/[lot]": ["./native/**"],
   },
   images: {
     remotePatterns: [
