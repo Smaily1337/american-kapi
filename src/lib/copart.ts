@@ -1,4 +1,5 @@
 import { CookieJar } from "tough-cookie";
+import { join } from "node:path";
 import { parseCopartLookup } from "./lookup";
 import type { Impit } from "impit";
 import type {
@@ -29,6 +30,12 @@ let cookiePromise: Promise<void> | null = null;
 
 async function getClient(): Promise<Impit> {
   if (!client) {
+    if (process.platform === "linux") {
+      process.env.NAPI_RS_NATIVE_LIBRARY_PATH = join(
+        process.cwd(),
+        "native/impit-node.linux-x64-gnu.node",
+      );
+    }
     if (!ImpitCtor) {
       const mod = await import("impit");
       ImpitCtor = mod.Impit;
