@@ -37,12 +37,24 @@ let linuxBindingReady: Promise<void> | null = null;
 
 function localLinuxBinding(): string | null {
   const candidates = [
-    fileURLToPath(
-      new URL("../../native/impit-node.linux-x64-gnu.node", import.meta.url),
-    ),
     join(process.cwd(), "native/impit-node.linux-x64-gnu.node"),
     join("/tmp", "impit-node.linux-x64-gnu.node"),
+    join(
+      process.cwd(),
+      "node_modules/impit-linux-x64-gnu/impit-node.linux-x64-gnu.node",
+    ),
   ];
+  try {
+    const meta =
+      typeof import.meta.url === "string"
+        ? import.meta.url
+        : String(import.meta.url);
+    candidates.unshift(
+      fileURLToPath(new URL("../../native/impit-node.linux-x64-gnu.node", meta)),
+    );
+  } catch {
+    /* Turbopack na Vercel bywa daje URL zamiast stringa */
+  }
   return (
     candidates.find(
       (path) => existsSync(path) && statSync(path).size > LINUX_BINDING_MIN_BYTES,

@@ -14,6 +14,8 @@ import type { Car } from "@/lib/types";
 import { getUsdPln } from "@/lib/nbp";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type Props = {
   params: Promise<{ id: string }>;

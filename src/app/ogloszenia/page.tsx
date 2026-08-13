@@ -10,6 +10,8 @@ import { parseCopartLookup } from "@/lib/lookup";
 import { getUsdPln } from "@/lib/nbp";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
