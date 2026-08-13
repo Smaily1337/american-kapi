@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["impit", "tough-cookie"],
+  serverExternalPackages: ["impit", "impit-linux-x64-gnu", "tough-cookie"],
+  outputFileTracingIncludes: {
+    "/*": [
+      "./node_modules/impit-linux-x64-gnu/**",
+      "./node_modules/impit/**",
+    ],
+  },
   images: {
     remotePatterns: [
       {

@@ -1,6 +1,6 @@
-import { Impit } from "impit";
 import { CookieJar } from "tough-cookie";
 import { parseCopartLookup } from "./lookup";
+import type { Impit } from "impit";
 import type {
   BodyType,
   Car,
@@ -23,12 +23,17 @@ type RawLot = Record<string, unknown>;
 
 let jar = new CookieJar();
 let client: Impit | null = null;
+let ImpitCtor: (typeof import("impit"))["Impit"] | null = null;
 let cookieTs = 0;
 let cookiePromise: Promise<void> | null = null;
 
-function getClient(): Impit {
+async function getClient(): Promise<Impit> {
   if (!client) {
-    client = new Impit({
+    if (!ImpitCtor) {
+      const mod = await import("impit");
+      ImpitCtor = mod.Impit;
+    }
+    client = new ImpitCtor({
       browser: "chrome131",
       timeout: 30000,
       ignoreTlsErrors: true,
@@ -49,7 +54,7 @@ function resetClient() {
 }
 
 async function refreshCookies(): Promise<void> {
-  const response = await getClient().fetch("https://www.copart.com/", {
+  const response = await (await getClient()).fetch("https://www.copart.com/", {
     headers: { Accept: "text/html,application/xhtml+xml" },
   });
   await response.text();
@@ -81,7 +86,7 @@ async function copartPost(
   referer: string,
 ): Promise<unknown> {
   const send = async () => {
-    const response = await getClient().fetch(url, {
+    const response = await (await getClient()).fetch(url, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
@@ -109,7 +114,7 @@ async function copartPost(
 
 async function copartGet(url: string, referer: string): Promise<unknown> {
   const send = async () => {
-    const response = await getClient().fetch(url, {
+    const response = await (await getClient()).fetch(url, {
       headers: {
         Accept: "application/json",
         Referer: referer,
